@@ -17,10 +17,10 @@ import type { ResolvedCall } from '../bidding'
 import { currentWinner, dummyOf, legalCards, NEXT_SEAT, PARTNER_SEAT, side, type PlayState } from './play'
 import { isSureWinner, playedCards, shownVoids, unseenTrumpCount, visibleSeats } from './card-counting'
 import { buildHandModel } from './hand-model'
-import { applyOpeningLeadSignal, applySignalReads, partnerLavinthalSak } from './signal-decode'
+import { applyOpeningLeadSignal, applySignalReads, partnerAvskrackteUtspelet, partnerLavinthalSak } from './signal-decode'
 import { chooseCardMonteCarlo } from './monte-carlo'
 import { avblockering } from './unblock'
-import { defensiveSignalCard, friaHackor, honorLead, leadFromSuit } from './signals'
+import { foljBetydelse, foljKort, friaHackor, honorLead, leadFromSuit, type FoljLage } from './signals'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
@@ -230,51 +230,35 @@ function defensiveFollowSignal(state: PlayState, seat: Seat, legal: Hand): CardC
     if (winCard.suit === led) candidates = candidates.filter((c) => rankVal(c.rank) < rankVal(winCard.rank))
     if (candidates.length < 2) return null
   }
-  // Gardregeln räknas på HELA innehavet i färgen (längden avgör vad som är fritt).
+  // Vad handen vill visa och vilket kort som bär det avgörs av EN regel som
+  // delas med läsaren (signals.ts `foljBetydelse`/`foljKort`, signal-decode.ts).
   const myInLed = state.hands[seat].filter((c) => c.suit === led)
-  const partnerLedde = state.currentTrick[0].seat === PARTNER_SEAT[seat]
-  // ATTITYD (partnern ledde): uppmuntra med styrka (Q+), med kort färg
-  // (stöldvärde i trumfkontrakt) eller — i sang mot partnerns honnörs-/
-  // sekvensutspel — med längd: fyra kort eller fler gör färgen till försvarets
-  // stickkälla (♣kn-6-4-3-2 mot ♣A, ägarbeslut 2026-11-23). Läser bara egen hand.
-  const hasQ = myInLed.some((c) => rankVal(c.rank) >= rankVal('Q'))
-  const shortRuff = state.trump !== null && led !== state.trump && myInLed.length <= 2
-  const langdISang =
-    state.trump === null && myInLed.length >= 4 && rankVal(state.currentTrick[0].card.rank) >= rankVal('10')
-  const encourage = partnerLedde && (hasQ || shortRuff || langdISang)
-  // Med dam eller högre i en färg på tre–fyra kort bär kortet närmast under
-  // honnörerna uppmuntran (åttan ur D-8-2, ägarbeslut 2026-11-23): gardregeln
-  // sparar annars de två högsta, och då blir tvåan — "jag avskräcker" — enda
-  // fria kortet. Tian och honnörerna offras fortfarande aldrig.
-  const fria =
-    encourage && hasQ && myInLed.length >= 3 && myInLed.length <= 4
-      ? myInLed.filter((c) => rankVal(c.rank) < rankVal('10'))
-      : friaHackor(myInLed)
-  candidates = candidates.filter((c) => fria.some((f) => f.rank === c.rank))
-  if (candidates.length < 2) return null
-  const played = playedCards(state)
-  const langFarg = myInLed.length >= 5
-
-  if (partnerLedde) {
-    const card = defensiveSignalCard(candidates, played, { kind: 'attitude', encourage }, { langFarg })
-    const reason = encourage
-      ? langdISang && !hasQ
+  const lage: FoljLage = {
+    iFargen: myInLed,
+    kandidater: candidates,
+    spelade: playedCards(state),
+    partnerLedde: state.currentTrick[0].seat === PARTNER_SEAT[seat],
+    trumfkontrakt: state.trump !== null,
+    trumfFargen: state.trump !== null && led === state.trump,
+    utspel: state.currentTrick[0].card.rank,
+  }
+  // Null = ingen räkning i TRUMFFÄRGEN (ägarbeslut 2026-11-23): jag följer med
+  // mitt lägsta, utan markering.
+  const vill = foljBetydelse(lage)
+  if (!vill) return null
+  const card = foljKort(lage, vill.kind, vill.hogt)
+  if (!card) return null
+  if (vill.kind === 'attitude') {
+    const reason = vill.hogt
+      ? vill.langd && !vill.hasQ
         ? 'Markering (§8.1): jag lägger högt = jag uppmuntrar partnerns färg (jag har längd i den).'
         : 'Markering (§8.1): jag lägger högt = jag uppmuntrar partnerns färg (jag har något där).'
       : 'Markering (§8.1): jag lägger lågt = jag avskräcker partnerns färg.'
     return { card, reason }
   }
-
-  // Ingen räkning i TRUMFFÄRGEN (ägarbeslut 2026-11-23): en hög trumf kan vara
-  // värd ett stick (överstöld, gard), och räkningen där hjälper spelföraren mer
-  // än partnern. Jag följer med mitt lägsta, utan markering.
-  if (state.trump !== null && led === state.trump) return null
-
   // Motståndaren ledde → RÄKNING (§8.1, rättvänt): jämnt antal = högt (högt-lågt),
   // udda antal = lågt (lågt-högt). Läser bara antalet egna kort i färgen.
-  const even = myInLed.length % 2 === 0
-  const card = defensiveSignalCard(candidates, played, { kind: 'count', even }, { langFarg })
-  const reason = even
+  const reason = vill.hogt
     ? 'Markering (§8.1): räkning – högt kort visar JÄMNT antal i färgen för partnern.'
     : 'Markering (§8.1): räkning – lågt kort visar UDDA antal i färgen för partnern.'
   return { card, reason }
@@ -700,6 +684,9 @@ export interface ReasonedOpts {
   /** Partnerns LOVADE minimilängd per färg i ursprungshanden, läst ur
    *  budgivningen (hand-modellen). Används för renons GENOM RÄKNING (§8.13). */
   partnerLength?: Partial<Record<Suit, number>>
+  /** Färger MOTSTÅNDARNA bjudit (ur budgivningen) — undviks när motspelaren
+   *  byter färg efter partnerns avskräckning ("vänd i objuden", §8.5). */
+  motstandarfarger?: Suit[]
 }
 
 /**
@@ -1666,6 +1653,85 @@ function dummyWinsWhateverILead(state: PlayState, seat: Seat, mineInSuit: Hand):
 }
 
 /**
+ * BYTESFÄRGEN när partnern avskräckt mitt utspel (§8.5, ägarbeslut 2026-11-24:
+ * "man kan ha ett säkert spel till eller ta vara på ett svagt bord"). Poäng per
+ * färg, allt ur egen hand + träkarlen + spelade kort:
+ *  - ett SÄKERT spel: toppen av en egen sekvens (kn-10-9);
+ *  - IGENOM träkarlens brutna honnörer när bordet spelar näst (K-x, E-D: den
+ *    saknade honnören kan sitta hos partnern, över bordet);
+ *  - UPP MOT träkarlens svaghet när bordet spelar sist (ingen dam eller högre);
+ *  - hellre en OBJUDEN färg än en motståndarna bjudit;
+ *  - inte färgen SPELFÖRAREN själv driver (den hjälper bara spelföraren);
+ *  - inte bort från en ensam honnör, aldrig under ett ess mot trumfkontrakt,
+ *    aldrig upp i träkarlens mästare med längd (§8.11), aldrig trumf.
+ * Null = ingen färg att byta till (då fortsätts utspelsfärgen som förr).
+ */
+function bytesfargEfterAvskrackning(
+  state: PlayState,
+  seat: Seat,
+  pool: Hand,
+  openingSuit: Suit,
+  undvik: Suit[],
+): { suit: Suit; varfor: 'sekvens' | 'igenom' | 'svaghet' | null } | null {
+  const dummy = dummyOf(state.contract)
+  const bordetNast = NEXT_SEAT[seat] === dummy
+  const played = playedCards(state)
+  const redanBytt = new Set<Suit>()
+  for (const t of state.completedTricks.slice(1)) {
+    const first = t.cards[0]
+    if (first && side(first.seat) === side(seat) && first.card.suit !== openingSuit) redanBytt.add(first.card.suit)
+  }
+  const spelforarensFarg = new Set<Suit>()
+  for (const t of state.completedTricks) {
+    const first = t.cards[0]
+    if (first && side(first.seat) !== side(seat)) spelforarensFarg.add(first.card.suit)
+  }
+  let best: { suit: Suit; varfor: 'sekvens' | 'igenom' | 'svaghet' | null; score: number; len: number } | null = null
+  for (const g of suitGroups(pool)) {
+    const suit = g[0].suit
+    if (suit === openingSuit || suit === state.trump) continue
+    if (leadsUpToDummyStrength(state, seat, suit)) continue
+    if (state.trump !== null && underleadsAce(g)) continue
+    const bordet = state.hands[dummy].filter((c) => c.suit === suit)
+    let score = 0
+    let varfor: 'sekvens' | 'igenom' | 'svaghet' | null = null
+    if (bordetNast) {
+      // Bruten honnör på bordet: en honnör där, och en HÖGRE honnör som varken
+      // jag, bordet eller de spelade korten visar — den kan sitta hos partnern.
+      const honnorer = bordet.filter((c) => rankVal(c.rank) >= rankVal('J'))
+      if (honnorer.length > 0) {
+        const lagsta = Math.min(...honnorer.map((c) => rankVal(c.rank)))
+        const saknas = (['A', 'K', 'Q'] as Rank[]).some(
+          (r) =>
+            rankVal(r) > lagsta &&
+            !bordet.some((c) => c.rank === r) &&
+            !g.some((c) => c.rank === r) &&
+            !played.some((c) => c.suit === suit && c.rank === r),
+        )
+        if (saknas) {
+          score += 3
+          varfor = 'igenom'
+        }
+      }
+    } else if (!bordet.some((c) => rankVal(c.rank) >= rankVal('Q'))) {
+      score += 3
+      varfor = 'svaghet'
+    }
+    if (honorLead(g) !== null) {
+      score += 4
+      varfor = 'sekvens'
+    } else if (unsafeToLead(g)) score -= 2
+    if (undvik.includes(suit)) score -= 3
+    if (spelforarensFarg.has(suit)) score -= 4
+    if (redanBytt.has(suit)) score += 2
+    if (best === null || score > best.score || (score === best.score && g.length > best.len)) {
+      best = { suit, varfor, score, len: g.length }
+    }
+  }
+  return best ? { suit: best.suit, varfor: best.varfor } : null
+}
+
+/**
  * Tumregel-valet MED förklaring. Samma logik som `botCard` men returnerar också
  * en klartextsmotivering ("Varför?"). Beskrivningarna följer nybörjardoktrinen.
  */
@@ -1778,6 +1844,69 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
             'Jag fortsätter INTE utspelsfärgen: träkarlen spelar sist och har färgens mästare med längd, så varje kort ' +
             'där går rakt upp i bordets styrka (§8.11). Jag spelar partnerns bytesfärg i stället.'
         }
+      }
+    }
+    // §8.5 (ägarbeslut 2026-11-24): partnern AVSKRÄCKTE mitt utspel. I
+    // trumfkontrakt byter jag färg direkt; i sang bara efter ett honnörsutspel
+    // (kungen från K-D-10-x in i ess-knekt) — en hacka från min långa färg
+    // fortsätts ändå, längden ger sticken. Men jag läser bordet först: sitter
+    // träkarlens honnör ENSAM kvar under min topp tar jag den.
+    // I sang byter jag dessutom bara när ett kort till KAN skänka ett stick:
+    // när det finns en lucka mellan mina två högsta kort (K-D-10 — knekten är
+    // ute). Är färgen TÄT i toppen (D-kn kvar, eller D-9-8 med knekt och tia
+    // spelade) kostar fortsättningen inget och färgen drivs vidare.
+    const tatITopp = (() => {
+      if (openingSuit === null) return false
+      const mina = legal.filter((c) => c.suit === openingSuit).sort((a, b) => rankVal(b.rank) - rankVal(a.rank))
+      if (mina.length < 2) return false
+      for (let r = rankVal(mina[1].rank) + 1; r < rankVal(mina[0].rank); r++) {
+        const rank = RANK_LOW_TO_HIGH[r]
+        if (!played.some((c) => c.suit === openingSuit && c.rank === rank)) return false
+      }
+      return true
+    })()
+    if (
+      signalsOn &&
+      openingSuit !== null &&
+      attackSuit === openingSuit &&
+      t1!.seat === seat &&
+      (state.trump !== null || (rankVal(t1!.card.rank) >= rankVal('10') && !tatITopp)) &&
+      partnerAvskrackteUtspelet(state, seat)
+    ) {
+      const mina = legal.filter((c) => c.suit === openingSuit)
+      const bordet = state.hands[dummyOf(state.contract)].filter((c) => c.suit === openingSuit)
+      const topp = highest(mina)
+      if (
+        bordet.length === 1 &&
+        rankVal(bordet[0].rank) >= rankVal('J') &&
+        rankVal(topp.rank) > rankVal(bordet[0].rank) &&
+        isSureWinner(topp, legal, played)
+      ) {
+        return {
+          card: topp,
+          reason:
+            'Partnern avskräckte mitt utspel (lade sitt lägsta kort), men träkarlens honnör sitter ensam kvar i ' +
+            'färgen – jag tar den med min topp innan jag byter färg (§8.5).',
+        }
+      }
+      const byte = bytesfargEfterAvskrackning(state, seat, pool, openingSuit, opts.motstandarfarger ?? [])
+      if (byte !== null) {
+        attackSuit = byte.suit
+        const vart =
+          byte.varfor === 'sekvens'
+            ? ' Jag väljer ett säkert spel: toppen av min sekvens.'
+            : byte.varfor === 'igenom'
+              ? ' Jag spelar igenom träkarlens honnörer, mot partnern som sitter över dem.'
+              : byte.varfor === 'svaghet'
+                ? ' Jag spelar upp mot träkarlens svaghet.'
+                : ''
+        attackReason =
+          (state.trump !== null
+            ? 'Partnern avskräckte mitt utspel (lade sitt lägsta kort): ingen dam och ingen kort färg där, så färgen ' +
+              'har inget mer att ge. Jag byter färg direkt (§8.5).'
+            : 'Partnern avskräckte mitt honnörsutspel (lade sitt lägsta kort): spelföraren har honnörerna över mig, och ' +
+              'ett kort till i färgen skänker ett stick. Jag byter färg och väntar på att partnern spelar igenom (§8.5).') +
+          vart
       }
     }
     const attack = attackSuit !== null ? legal.filter((c) => c.suit === attackSuit) : []
@@ -2312,13 +2441,18 @@ export function botCardSmartBase(
   if (cardsLeft > maxCards) {
     // §8.13: tumregeln är budblind, men renons GENOM RÄKNING behöver partnerns
     // lovade längd — bara den raden ur hand-modellen skickas med (försvarare på utspel).
-    if (state.currentTrick.length === 0 && state.trump !== null && calls.length > 0 && side(seat) !== side(state.contract.declarer)) {
+    // §8.5: motståndarnas bjudna färger följer med, så att ett färgbyte efter
+    // partnerns avskräckning hellre går till en objuden färg.
+    const paUtspel = state.currentTrick.length === 0 && calls.length > 0 && side(seat) !== side(state.contract.declarer)
+    const motstandarfarger = paUtspel ? analyzeAuctionForLead(calls, seat).oppSuits : []
+    if (paUtspel && state.trump !== null) {
       const lovat = buildHandModel(calls, {})[PARTNER_SEAT[seat]].length
       return botCardReasoned(state, seat, {
         partnerLength: { spades: lovat.spades.min, hearts: lovat.hearts.min, diamonds: lovat.diamonds.min, clubs: lovat.clubs.min },
+        motstandarfarger,
       })
     }
-    return botCardReasoned(state, seat)
+    return botCardReasoned(state, seat, { motstandarfarger })
   }
 
   // Felrapport #89 (2026-09-28): FJÄRDE hand i försvaret när partnern REDAN

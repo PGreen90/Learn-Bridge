@@ -17,7 +17,7 @@
 // kort (exakt återstående längd) – det sistnämnda hör hemma i Monte Carlo-
 // samplaren (Steg 3), som delar ut bara osedda kort med renons/antal som grind.
 
-import type { Seat, Suit } from '../../types/bridge'
+import type { Card, Rank, Seat, Suit } from '../../types/bridge'
 import type { ResolvedCall } from '../bidding'
 
 const CONTRACT_BID = /^([1-7])(C|D|H|S|NT)$/
@@ -39,6 +39,29 @@ export interface Range {
 /** Max honnörspoäng i EN färg (A+K+D+kn = 4+3+2+1). */
 const SUIT_HCP_CEIL = 10
 
+/**
+ * En LÄST följemarkering (§8.5): kortet en motspelare lade när den följde färg,
+ * och allt som behövs för att fråga "skulle den här handen ha lagt det kortet?"
+ * (`markeringStammer` i signal-decode.ts). Bara öppen information: kortet, läget
+ * i sticket och korten som fallit — aldrig en dold hand.
+ */
+export interface Markeringslasning {
+  /** Kortet som lades (färgen = den ledda färgen). */
+  card: Card
+  kind: 'attitude' | 'count'
+  /** Platsens egna kort i färgen från TIDIGARE stick (borta ur innehavet då). */
+  tidigare: Card[]
+  /** Alla kort som spelats före det här kortet. */
+  spelade: Card[]
+  /** Partnerns vinnande kort i färgen som markeringen måste ligga under, annars null. */
+  under: Rank | null
+  trumfkontrakt: boolean
+  /** Sant när den ledda färgen är trumffärgen. */
+  trumfFargen: boolean
+  /** Kortet som spelades ut i sticket. */
+  utspel: Rank
+}
+
 /** Vad auktionen (+ spelet) ärligt säger om EN plats hand. */
 export interface SeatConstraint {
   hcpMin: number
@@ -56,6 +79,9 @@ export interface SeatConstraint {
    *  vårt eget system (MC-urfallet fix 1, 2026-08-13). Sänkt i 3:e hand (10 —
    *  lättöppning) och 4:e hand (9 — regeln om 15). */
   minPoints?: number
+  /** Lästa följemarkeringar (attityd/räkning) — mjuk inferens: samplaren stryker
+   *  händer som skulle ha markerat tvärtom, och släpper kravet om inget läge går ihop. */
+  markeringar?: Markeringslasning[]
 }
 
 export type HandModel = Record<Seat, SeatConstraint>
