@@ -514,7 +514,7 @@ export function responderRebidAfterSemiForcing1NT(hand: Hand, M: Major, rebid: R
       if (rs !== 'hearts' && rs !== 'spades' && len[rs] >= 4 && hasRealControl(hand, rs)) {
         return { call: `4${BID[rs]}`, rule: 'dubbelanpassning', explanation: `3 ${SYM[M]} och 4+ ${SYM[rs]} med kontroll (ess/singel/KQ) → 4${SYM[rs]} (dubbelanpassning, utgångskrav — sätter ${SYM[M]} som trumf).` }
       }
-      return { call: `2${mBid}`, rule: 'inbjudan (limithöjning)', explanation: `3 stöd, exakt 10–11 → 2${mSym} (öppnaren passar med minimum, går till utgång med extra).` }
+      return { call: `2${mBid}`, rule: 'inbjudan (limithöjning)', explanation: `3 stöd, exakt 10–11 → 2${mSym} (öppnaren går till utgång med 15+ med fördelning, annars pass).` }
     }
     const inv = inviteSuit()
     if (inv) return inv
