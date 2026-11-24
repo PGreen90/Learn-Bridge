@@ -18,7 +18,7 @@ svarar på vad).
 Önskemål: träna utspel och markeringar. FÖRST lagas §8. **Markeringarna är RÄTTVÄNDA**
 (ägarbeslut 2026-11-23, LIVE v1.0.13 `b6a6cb8` + `4d55e43`): högt uppmuntrar, högt-lågt =
 jämnt, ingen räkning i trumf — boken sa "omvänd" i fem månader (historik 11-23).
-**Kvar, ägarbeslut:** bottarna läser inte uppmuntran/räkning · utspelet läses bara i sang ·
+Bottarna LÄSER uppmuntran/räkning + byter färg vid avskräckning (2026-11-24). **Kvar, ägarbeslut:** utspelet läses bara i sang ·
 färgpreferens efter attityd · §8.7 "ta esset" i sang · fyra-kortsgränsen för längd i sang.
 Stjärntävlingen (kodnamn `guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
 Senast LIVE: `9aebe8d` startsidans tryckkänsla · v1.0.11 startsidan i grupper · v1.0.5 `1731319` (spelbordet A–E).

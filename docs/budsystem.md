@@ -3712,20 +3712,73 @@ när partnern *läser* markeringen. I korta färger där varje kort behövs läg
 boten hellre lågt utan markering. Bottarna på **spelförarsidan** markerar aldrig
 (markeringar är försvarets språk).
 
-**Bottarna LÄSER också markeringar (Steg 5).** Bot-hjärnan (Monte-Carlo) tolkar
-det tydligaste fallet: en **avskräckande** attityd på partnerns färg (spelarens
-**lägsta** kort) betyder att markeraren saknar dam+ i färgen, så samplaren slutar
-lägga dam/kung där. Uppmuntran (tvetydig: dam+, kort färg *eller* längd i sang)
-och räkning (paritet) avkodas inte ännu.
+**Bottarna LÄSER attityd och räkning (2026-11-24).** När bot-hjärnan tänker
+igenom vilka händer de andra kan ha frågar den för varje tänkt hand det en
+människa frågar vid bordet: *"skulle partnern ha lagt det där kortet från den
+där handen?"* Svaret ges av **samma regel** som den som markerar använder, så
+den som lägger och den som läser kan aldrig mena olika saker. En hand som hade
+haft ett val och enligt regeln hade lagt det **motsatta** kortet stryks:
 
-**Bara ett bevisligen lägsta kort avskräcker (2026-11-22, vänt 2026-11-23).**
-Ett kort läses som avskräckande bara när **alla lägre kort** i färgen redan syns
-för den som läser — i egen hand, på bordet eller spelade — så att kortet säkert
-är spelarens lägsta. Dessutom ska minst **två högre hackor** (under tian) vara
-osedda: annars hade spelaren kanske inget att uppmuntra med. *Exempel: partnern
-spelar ut ♥A, bordet lägger ♥4 och din partner ♥2. Tvåan är hens lägsta och
-förnekar damen. En trea med tvåan osedd säger ingenting.* **Känd lucka:** den
-som har D-2 dubbelton eller D-10-2 lägger också sitt lägsta.
+- **Attityd (partnern spelade ut färgen).** Ett **högt** kort stämmer bara med
+  en hand som uppmuntrar: dam eller högre, en kort färg i trumfkontrakt, eller —
+  i sang mot ett honnörsutspel — fyra kort eller fler. Ett **lågt** kort stämmer
+  bara med en hand som inte har något av det. *Exempel: Väst spelar ut ♥A i
+  sang och Öst lägger ♥2. Då vet Väst att Öst varken har ♥D-5-2 (hade lagt
+  femman) eller fyra hjärter (hade uppmuntrat med längden).*
+- **Räkning (spelföraren spelade färgen).** Ett **högt** kort stämmer bara med
+  ett jämnt antal, ett **lågt** bara med ett udda. *Exempel: spelföraren spelar
+  spader och Väst lägger ♠7. Öst räknar: ♠7-3 stämmer, ♠7-4-3 gör det inte.* I
+  trumffärgen ges ingen räkning, och då läses ingen heller.
+- **Ett tvingat kort säger ingenting.** ♥2 ur ♥D-2 är enda fria kortet och
+  stryker inget; ♠7 ur ♠K-7 likaså. Ett **mellankort** som regeln inte känner
+  igen (♠7 ur ♠8-7-4-3) läses inte heller — hellre en missad läsning än en falsk.
+
+**Vad som räknas som en markering.** Bara en hacka (under tian) som en
+motspelare lägger när den följer färg, under de **fem första sticken** och de
+två första gångerna färgen spelas, utan att ta sticket. I tredje och fjärde hand
+är ett kort som går **över** det högsta i sticket ett försök att vinna, ingen
+markering. (Efter de fem första sticken räknar bot-hjärnan fram varje kort, och
+då bär korten ingen markering.) Går inget tänkt läge ihop med markeringarna —
+någon vid bordet markerar inte enligt systemet — släpps markeringarna först;
+det budgivningen visat står kvar.
+
+**Spelföraren läser också.** Markeringar är öppna kort: en bot som spelför ser
+motspelets attityd och räkning och räknar med dem, precis som en människa.
+
+**Utspelaren lyder partnerns avskräckning (ägarbeslut 2026-11-24).** Förr
+fortsatte motspelaren alltid utspelsfärgen. Nu läser den som spelade ut partnerns
+kort i första sticket: är det **bevisligen partnerns lägsta** (alla lägre kort i
+färgen syns — i egen hand, på bordet eller spelade — och minst två högre hackor
+är osedda) har partnern avskräckt.
+
+- **Trumfkontrakt: byt färg direkt.** Partnern har varken dam eller kort färg,
+  så färgen har inget mer att ge. *Exempel: du spelar ut ♥A från ♥A-K-7-5,
+  bordet har ♥kn-6-4 och partnern lägger ♥2. Kungen sparas och du byter färg.*
+- **Men läs bordet först.** Sitter träkarlens honnör **ensam kvar** under din
+  topp tar du den. *Exempel: bordet hade ♥D-4 och lade fyran — damen är ensam,
+  du tar kungen.*
+- **Sang, honnörsutspel: byt färg.** *Exempel: du spelar ut ♥K från ♥K-D-10-5,
+  kungen får behålla sticket och partnern lägger sitt lägsta. Spelföraren har
+  ess-knekt; ett kort till skänker ett stick. Du byter färg och väntar på att
+  partnern spelar igenom.*
+- **Sang, men färgen är tät i toppen: fortsätt.** Bytet gäller bara när ett kort
+  till *kan* skänka ett stick — när det finns en **lucka** mellan dina två högsta
+  kort. Utan lucka kostar fortsättningen inget, och färgen drivs vidare.
+  *Exempel: du spelar ut ♦K från ♦K-D-kn-10-7, bordet kryper med esset och
+  partnern lägger sitt lägsta. Du fortsätter med damen. Likaså ♣D-9-8 kvar när
+  knekten och tian redan är spelade.*
+- **Sang, hacka från lång färg: fortsätt ändå.** Längden ger sticken;
+  avskräckningen säger bara att partnern saknar honnör där. (I trumfkontrakt
+  byter du färg även då.)
+- **Bytesfärgen** — "man kan ha ett säkert spel till eller ta vara på ett svagt
+  bord": i första hand toppen av en **egen sekvens** (♦kn från ♦kn-10-9);
+  annars **igenom träkarlens brutna honnörer** när bordet spelar näst (K-x,
+  E-D — den saknade honnören kan sitta hos partnern, över bordet) eller **upp
+  mot träkarlens svaghet** när bordet spelar sist. Hellre en **objuden** färg än
+  en motståndarna bjudit, och **inte färgen spelföraren själv driver**. Aldrig bort från en ensam honnör om något annat finns,
+  aldrig under ett ess mot trumfkontrakt, aldrig trumf.
+- Uppmuntrar partnern, eller är kortet inte säkert det lägsta, fortsätts
+  utspelsfärgen som förr.
 
 **Även människans markeringar läses (felrapport #96, ägarbeslut 2026-10-06).**
 Förr avkodades bara bottarnas kort ("människans metod känner vi inte"); nu antar
@@ -3967,6 +4020,29 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-24 — färgbytet i sang kräver en lucka (§8.5):** mätgivarna 20260752
+  (♦K från K-D-kn-10-7, bytte till spader) och 20260798 (♣D-9-8 kvar, bytte till
+  spelförarens ruter) gav spelföraren ett stick var. Nu byter utspelaren i sang
+  bara när ett osett kort ligger mellan de två högsta korten i färgen, och
+  bytesfärgen undviker färgen spelföraren själv spelat. Facit
+  `markering-byt-farg.test.ts` ("TÄT färg").
+- **2026-11-24 — utspelaren lyder partnerns avskräckning (§8.5, ägarbeslut):**
+  trumfkontrakt = byt färg direkt (men ta träkarlens ensamma honnör med toppen);
+  sang = byt efter honnörsutspel, fortsätt en hacka från lång färg. Bytesfärgen:
+  egen sekvens, igenom bordets brutna honnörer / upp mot bordets svaghet, hellre
+  objuden. `partnerAvskrackteUtspelet` (`signal-decode.ts`),
+  `bytesfargEfterAvskrackning` (`play-bot.ts`), `ReasonedOpts.motstandarfarger`.
+  Facit `markering-byt-farg.test.ts`.
+- **2026-11-24 — bottarna läser uppmuntran och räkning (§8.5, inventeringen):**
+  förr lästes bara "bevisligen lägsta kortet = ingen dam", med kända luckor
+  (D-2, D-10-2). Nu kör läsaren samma regel som den som markerar
+  (`foljBetydelse`/`foljKort` i `signals.ts`, delad med `defensiveFollowSignal`)
+  på varje tänkt hand i Monte-Carlo-samplaren (`markeringStammer`,
+  `SeatConstraint.markeringar`): en hand som hade lagt det motsatta kortet
+  stryks. Läser attityd (dam+, kort färg i trumf, längd i sang) och räkning
+  (jämnt/udda, aldrig i trumf); tvingade kort och mellankort läses inte. Bara de
+  fem första sticken. Det gamla HP-taket är borttaget. Facit
+  `markering-lasning.test.ts`.
 - **2026-11-23 — ingen räkning i trumffärgen (§8.5, ägarbeslut):** med rättvänd
   markering började en dubbelton högt även i trumf — ♥9 ur 9-2 under
   spelförarens trumfess (frö 20260753), ♠8 ur 8-3 (frö 20260819). Nu följer

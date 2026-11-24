@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Card, Hand, Rank, Seat, Suit } from '../../types/bridge'
 import { buildHandModel } from './hand-model'
 import type { Contract, PlayState, Trick } from './play'
-import { applyOpeningLeadSignal, applySignalReads } from './signal-decode'
+import { applyOpeningLeadSignal, applySignalReads, markeringStammer } from './signal-decode'
 import { sampleLayouts } from './monte-carlo'
 
 const C = (rank: Rank, suit: Suit): Card => ({ suit, rank })
@@ -150,64 +150,67 @@ describe('signalavkodning – e2e: samplaren placerar den avkodade honnören', (
   })
 })
 
-describe('signalavkodning – ATTITYD under spelet (Steg 5b): avskräckning → HP-tak', () => {
-  /** Läge med ett avslutat stick: Öst (motspelare) ledde färgen, Väst (partner)
-   *  följde med kortet `westCard`, spelföraren N vann. Aktör = N (läser Väst). */
+describe('signalavkodning – ATTITYD under spelet (§8.5): skulle handen ha lagt det kortet?', () => {
+  /** Läge med ett avslutat stick: Öst (motspelare) ledde ♥A, Väst (partner)
+   *  följde med kortet `westCard`. Aktör = N (spelföraren läser Väst). */
   function afterAttitude(westCard: Card, declarer: Seat = 'N'): PlayState {
     const trick: Trick = {
       leader: 'E',
       cards: [
-        { seat: 'E', card: C('5', 'hearts') },
+        { seat: 'E', card: C('A', 'hearts') },
         { seat: 'S', card: C('2', 'hearts') },
         { seat: 'W', card: westCard },
-        { seat: 'N', card: C('K', 'hearts') },
+        { seat: 'N', card: C('5', 'hearts') },
       ],
-      winner: 'N',
+      winner: 'E',
     }
     return {
       contract: { declarer, strain: 'NT', level: 3 }, trump: null,
       hands: { N: [], E: [], S: [], W: [] },
-      leader: 'E', toAct: 'N', currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
+      leader: 'E', toAct: 'E', currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
     }
   }
+  const lasning = (state: PlayState, reader: Seat, who: Seat, opts: { humanSeat?: Seat | null } = {}) =>
+    applySignalReads(buildHandModel([]), state, reader, opts)[who].markeringar ?? []
 
   // Rättvänd markering (ägarbeslut 2026-11-23): LÅGT avskräcker, högt uppmuntrar.
-  it('bevisligen lägsta kortet (♥3, tvåan ligger i sticket) → Väst förnekar dam+ (HP-tak 1)', () => {
-    const model = applySignalReads(buildHandModel([]), afterAttitude(C('3', 'hearts')), 'N')
-    expect(model.W.suitHcp.hearts.max).toBe(1)
+  it('lågt kort (♥3) → en hand med dam tredje stryks, tre hackor står kvar', () => {
+    const [m] = lasning(afterAttitude(C('3', 'hearts')), 'N', 'W')
+    expect(markeringStammer(m, H('hearts', 'Q', '7', '3'))).toBe(false)
+    expect(markeringStammer(m, H('hearts', '8', '7', '3'))).toBe(true)
   })
 
-  it('högt kort (♥9) uppmuntrar — tvetydigt (dam+, kort färg eller längd) → ingen slutsats', () => {
-    const model = applySignalReads(buildHandModel([]), afterAttitude(C('9', 'hearts')), 'N')
-    expect(model.W.suitHcp.hearts.max).toBe(10)
+  it('högt kort (♥9) uppmuntrar → dam tredje står kvar, tre hackor stryks', () => {
+    const [m] = lasning(afterAttitude(C('9', 'hearts')), 'N', 'W')
+    expect(markeringStammer(m, H('hearts', 'Q', '9', '3'))).toBe(true)
+    expect(markeringStammer(m, H('hearts', '9', '7', '3'))).toBe(false)
   })
 
-  it('lågt men inte bevisligen lägst (♥4, trean osedd) → ingen slutsats', () => {
-    const model = applySignalReads(buildHandModel([]), afterAttitude(C('4', 'hearts')), 'N')
-    expect(model.W.suitHcp.hearts.max).toBe(10)
+  it('ett mellankort (♥7 ur 9-7-3) känner regeln inte igen → ingen slutsats', () => {
+    const [m] = lasning(afterAttitude(C('7', 'hearts')), 'N', 'W')
+    expect(markeringStammer(m, H('hearts', '9', '7', '3'))).toBe(true)
   })
 
   // Felrapport #96 (ägarbeslut 2026-10-06): även människans markeringar läses —
-  // antagandet är att hon spelar appens §8-system. Förr orört; `humanSeat: 'S'`
-  // stänger fortfarande av det (för tester/experiment).
-  it('människans (Syd) avskräckning läses också — men inte med humanSeat satt', () => {
-    // Ö/V spelför → N/S försvarar. Nord leder ♥, Syd (människan) följer ♥3.
+  // antagandet är att hon spelar appens §8-system. `humanSeat: 'S'` stänger
+  // fortfarande av det (för tester/experiment).
+  it('människans (Syd) markering läses också — men inte med humanSeat satt', () => {
+    // Ö/V spelför → N/S försvarar. Nord leder ♥A, Syd (människan) följer ♥3.
     const trick: Trick = {
       leader: 'N',
       cards: [
-        { seat: 'N', card: C('5', 'hearts') }, { seat: 'E', card: C('2', 'hearts') },
-        { seat: 'S', card: C('3', 'hearts') }, { seat: 'W', card: C('K', 'hearts') },
+        { seat: 'N', card: C('A', 'hearts') }, { seat: 'E', card: C('2', 'hearts') },
+        { seat: 'S', card: C('3', 'hearts') }, { seat: 'W', card: C('5', 'hearts') },
       ],
-      winner: 'W',
+      winner: 'N',
     }
     const state: PlayState = {
       contract: { declarer: 'W', strain: 'NT', level: 3 }, trump: null,
       hands: { N: [], E: [], S: [], W: [] },
-      leader: 'N', toAct: 'E', currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
+      leader: 'N', toAct: 'N', currentTrick: [], completedTricks: [trick], tricksNS: 0, tricksEW: 0,
     }
-    const model = applySignalReads(buildHandModel([]), state, 'E')
-    expect(model.S.suitHcp.hearts.max).toBe(1) // ♥3 (tvåan syns) = avskräckning: ingen dam+
-    const off = applySignalReads(buildHandModel([]), state, 'E', { humanSeat: 'S' })
-    expect(off.S.suitHcp.hearts.max).toBe(10) // avstängd läsning → orört
+    const [m] = lasning(state, 'E', 'S')
+    expect(markeringStammer(m, H('hearts', 'Q', '7', '3'))).toBe(false) // ♥3 = avskräckning: ingen dam tredje
+    expect(lasning(state, 'E', 'S', { humanSeat: 'S' })).toEqual([]) // avstängd läsning → orört
   })
 })

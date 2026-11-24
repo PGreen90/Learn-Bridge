@@ -24,6 +24,7 @@ const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
 import { doubleDummyDeclarerRemaining } from './dds'
 import type { HandModel, SeatConstraint } from './hand-model'
+import { markeringStammer } from './signal-decode'
 
 const SEATS: Seat[] = ['N', 'E', 'S', 'W']
 const SUITS: Suit[] = ['spades', 'hearts', 'diamonds', 'clubs']
@@ -89,6 +90,11 @@ function satisfies(c: SeatConstraint, assigned: Hand, played: Card[]): boolean {
   if (c.minPoints) {
     const orig = [...assigned, ...played]
     if (Math.max(origHcp, startingPoints(orig).startingPoints) < c.minPoints) return false
+  }
+  // Lästa markeringar (§8.5): en hand som skulle ha markerat tvärtom stryks.
+  if (c.markeringar && c.markeringar.length > 0) {
+    const orig = [...assigned, ...played]
+    for (const m of c.markeringar) if (!markeringStammer(m, orig)) return false
   }
   return true
 }
@@ -162,6 +168,15 @@ export function sampleLayouts(
 
   const out = sampla(model)
   if (out.length > 0) return out
+  // Går inget läge ihop med de lästa markeringarna (en människa som inte
+  // markerar enligt systemet, eller ett kort lagt av ett annat skäl) släpps
+  // markeringarna FÖRST — budinferenserna får stå kvar.
+  if (SEATS.some((s) => (model[s].markeringar?.length ?? 0) > 0)) {
+    const utan = {} as HandModel
+    for (const s of SEATS) utan[s] = { ...model[s], markeringar: undefined }
+    const igen = sampla(utan)
+    if (igen.length > 0) return igen
+  }
   // Robusthetsnätet (MC-urfallet fix 2, 2026-08-13): 0 lägen betyder att någon
   // MJUK inferens (budhärlett hp/längd-golv, signalgolv) motsäger korten vi
   // faktiskt sett. En människa släpper då antagandet — inte hela analysen.

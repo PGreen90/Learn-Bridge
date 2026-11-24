@@ -224,3 +224,78 @@ export function defensiveSignalCard(
       return lavinthalDiscard(spare, signal.wantHigher)
   }
 }
+
+// --- Följemarkeringen: EN regel för den som markerar och den som läser --------
+//
+// `foljBetydelse` säger vad en hand VILL visa när den följer färg (attityd på
+// partnerns utspel, räkning på motståndarens), `foljKort` vilket kort som bär
+// det. play-bot lägger kortet; signal-decode kör samma två funktioner på varje
+// tänkt hand för att läsa det ("skulle partnern ha lagt det där kortet från den
+// där handen?"). Samma kod åt båda håll = sändare och läsare kan inte glida isär.
+
+/** Läget när en motspelare följer färg, sett ur den egna handen + det spelade. */
+export interface FoljLage {
+  /** Hela innehavet i den ledda färgen (gardregeln räknas på hela längden). */
+  iFargen: Card[]
+  /** Korten som får läggas: innehavet, minus allt som går ÖVER partnerns vinnande kort. */
+  kandidater: Card[]
+  /** Alla kort som spelats före det här kortet. */
+  spelade: Card[]
+  partnerLedde: boolean
+  /** Sant i ett trumfkontrakt (kort färg uppmuntrar bara där, längd bara i sang). */
+  trumfkontrakt: boolean
+  /** Sant när den ledda färgen ÄR trumffärgen. */
+  trumfFargen: boolean
+  /** Kortet som spelades ut i sticket. */
+  utspel: Rank
+}
+
+export interface FoljBetydelse {
+  kind: 'attitude' | 'count'
+  /** Attityd: uppmuntrar. Räkning: jämnt antal. Sant = det HÖGA kortet. */
+  hogt: boolean
+  /** Attityd: dam eller högre i färgen. */
+  hasQ: boolean
+  /** Attityd: uppmuntrar på längd i sang (fyra kort eller fler mot honnörsutspel). */
+  langd: boolean
+}
+
+/** Vad handen vill visa. Null = ingen markering i det här läget (räkning i trumffärgen). */
+export function foljBetydelse(l: FoljLage): FoljBetydelse | null {
+  const n = l.iFargen.length
+  if (l.partnerLedde) {
+    // ATTITYD: uppmuntra med styrka (Q+), med kort färg (stöldvärde i
+    // trumfkontrakt) eller — i sang mot partnerns honnörs-/sekvensutspel — med
+    // längd: fyra kort eller fler (♣kn-6-4-3-2 mot ♣A, ägarbeslut 2026-11-23).
+    const hasQ = l.iFargen.some((c) => rankVal(c.rank) >= rankVal('Q'))
+    const kortFarg = l.trumfkontrakt && !l.trumfFargen && n <= 2
+    const langd = !l.trumfkontrakt && n >= 4 && rankVal(l.utspel) >= rankVal('10')
+    return { kind: 'attitude', hogt: hasQ || kortFarg || langd, hasQ, langd }
+  }
+  // Ingen räkning i TRUMFFÄRGEN (ägarbeslut 2026-11-23).
+  if (l.trumfFargen) return null
+  // RÄKNING: jämnt antal = högt (högt-lågt), udda = lågt (lågt-högt).
+  return { kind: 'count', hogt: n % 2 === 0, hasQ: false, langd: false }
+}
+
+/**
+ * Kortet som bär betydelsen `hogt` (för attityd: uppmuntrar, för räkning: jämnt).
+ * Null = handen har ingen frihet att markera (färre än två fria kort).
+ */
+export function foljKort(l: FoljLage, kind: 'attitude' | 'count', hogt: boolean): Card | null {
+  if (l.kandidater.length < 2) return null
+  const n = l.iFargen.length
+  const hasQ = l.iFargen.some((c) => rankVal(c.rank) >= rankVal('Q'))
+  // Med dam eller högre i en färg på tre–fyra kort bär kortet närmast under
+  // honnörerna uppmuntran (åttan ur D-8-2, ägarbeslut 2026-11-23): gardregeln
+  // sparar annars de två högsta, och då blir tvåan — "jag avskräcker" — enda
+  // fria kortet. Tian och honnörerna offras fortfarande aldrig.
+  const fria =
+    kind === 'attitude' && hogt && hasQ && n >= 3 && n <= 4
+      ? l.iFargen.filter((c) => rankVal(c.rank) < rankVal('10'))
+      : friaHackor(l.iFargen)
+  const kandidater = l.kandidater.filter((c) => fria.some((f) => f.rank === c.rank))
+  if (kandidater.length < 2) return null
+  const signal: DefensiveSignal = kind === 'attitude' ? { kind, encourage: hogt } : { kind, even: hogt }
+  return defensiveSignalCard(kandidater, l.spelade, signal, { langFarg: n >= 5 })
+}

@@ -20,9 +20,10 @@
 
 import type { Card, Rank, Seat, Suit } from '../../types/bridge'
 import { playedCards, visibleSeats } from './card-counting'
-import { PARTNER_SEAT, side, type PlayState } from './play'
-import type { HandModel } from './hand-model'
-import { lenMin, suitHcpCeil, suitHcpFloor } from './hand-model'
+import { currentWinner, PARTNER_SEAT, side, type PlayState } from './play'
+import type { HandModel, Markeringslasning } from './hand-model'
+import { lenMin, suitHcpFloor } from './hand-model'
+import { foljBetydelse, foljKort, type FoljLage } from './signals'
 
 const RANK_LOW_TO_HIGH: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 const rankVal = (r: Rank) => RANK_LOW_TO_HIGH.indexOf(r)
@@ -107,24 +108,6 @@ export function applyOpeningLeadSignal(
   return model
 }
 
-/** Antal kort i `card`s färg som är LÄGRE än kortet och ännu osedda för `seat`
- *  — varken spelade eller i en hand platsen lagligt ser (egen + träkarlen). */
-function oseddaLagre(state: PlayState, seat: Seat, card: Card): number {
-  const sedda = new Set<Rank>()
-  for (const c of playedCards(state)) if (c.suit === card.suit) sedda.add(c.rank)
-  for (const v of visibleSeats(state, seat)) for (const c of state.hands[v]) if (c.suit === card.suit) sedda.add(c.rank)
-  return RANK_LOW_TO_HIGH.slice(0, rankVal(card.rank)).filter((r) => !sedda.has(r)).length
-}
-
-/** Antal HACKOR (under tian) i `card`s färg som är HÖGRE än kortet och ännu
- *  osedda för `seat` — kort spelaren kunde ha uppmuntrat med. */
-function oseddaHogreHackor(state: PlayState, seat: Seat, card: Card): number {
-  const sedda = new Set<Rank>()
-  for (const c of playedCards(state)) if (c.suit === card.suit) sedda.add(c.rank)
-  for (const v of visibleSeats(state, seat)) for (const c of state.hands[v]) if (c.suit === card.suit) sedda.add(c.rank)
-  return RANK_LOW_TO_HIGH.slice(rankVal(card.rank) + 1, rankVal('10')).filter((r) => !sedda.has(r)).length
-}
-
 /** Klampa längd- och färg-HP-golv mot taket för en plats/färg efter skärpning. */
 function clampSeat(model: HandModel, seat: Seat, suit: Suit): void {
   const c = model[seat]
@@ -133,21 +116,61 @@ function clampSeat(model: HandModel, seat: Seat, suit: Suit): void {
   if (c.suitHcp[suit].min > c.suitHcp[suit].max) c.suitHcp[suit].min = c.suitHcp[suit].max
 }
 
+/** Markeringar läggs bara medan tumreglerna spelar: de fem första sticken
+ *  (mer än åtta kort på handen). Därefter väljer Monte-Carlo kortet och då bär
+ *  det ingen markering. */
+const MARKERINGSSTICK = 5
+
 /**
- * Signalavkodning under spelets gång (markeringar Steg 5b, docs/budsystem.md §8.5).
- * Läser botarnas ATTITYDMARKERINGAR och skärper hand-modellen så Monte-Carlo-
- * samplaren delar ut de dolda händerna troligare.
+ * Stämmer den lästa markeringen med den här (tänkta) ursprungshanden? Frågan en
+ * människa ställer vid bordet: "skulle partnern ha lagt det där kortet från den
+ * där handen?" Svaret ges av SAMMA regel som den som markerar använder
+ * (`foljBetydelse`/`foljKort`): handen stryks bara när den hade haft ett val och
+ * regeln hade valt det MOTSATTA kortet — ♥2 från ♥D-5-2 (hade uppmuntrat med
+ * femman), ♠7 från ♠7-4-3 (udda antal lägger lågt). Ett tvingat kort (♥2 ur
+ * ♥D-2) och ett kort regeln inte känner igen (ett mellankort) stryker ingenting:
+ * hellre en missad läsning än en falsk.
+ */
+export function markeringStammer(m: Markeringslasning, ursprungshand: Card[]): boolean {
+  const suit = m.card.suit
+  const borta = new Set(m.tidigare.map((c) => c.rank))
+  const iFargen = ursprungshand.filter((c) => c.suit === suit && !borta.has(c.rank))
+  if (!iFargen.some((c) => c.rank === m.card.rank)) return true // kortet finns inte här: inget att pröva
+  const tak = m.under === null ? null : rankVal(m.under)
+  const kandidater = tak === null ? iFargen : iFargen.filter((c) => rankVal(c.rank) < tak)
+  if (kandidater.length < 2) return true // inget val
+  const lage: FoljLage = {
+    iFargen,
+    kandidater,
+    spelade: m.spelade,
+    partnerLedde: m.kind === 'attitude',
+    trumfkontrakt: m.trumfkontrakt,
+    trumfFargen: m.trumfFargen,
+    utspel: m.utspel,
+  }
+  const vill = foljBetydelse(lage)
+  if (!vill) return true
+  const lagsta = kandidater.reduce((lo, c) => (rankVal(c.rank) < rankVal(lo.rank) ? c : lo))
+  const ratt = foljKort(lage, vill.kind, vill.hogt) ?? lagsta
+  const tvartom = foljKort(lage, vill.kind, !vill.hogt) ?? lagsta
+  if (ratt.rank === tvartom.rank) return true // tvingat kort: ingen markering
+  return m.card.rank !== tvartom.rank
+}
+
+/**
+ * Signalavkodning under spelets gång (docs/budsystem.md §8.5). Läser
+ * motspelarnas FÖLJEMARKERINGAR — attityd på partnerns utspel (högt uppmuntrar:
+ * dam eller högre, kort färg i trumfkontrakt, längd i sang mot honnörsutspel)
+ * och räkning på spelförarens (högt = jämnt antal, lågt = udda; aldrig i
+ * trumffärgen) — och lägger dem i hand-modellen som `markeringar`. Monte-Carlo-
+ * samplaren stryker sedan varje tänkt hand som skulle ha markerat tvärtom
+ * (`markeringStammer`).
  *
- * Just nu avkodas det tydligaste fallet: en AVSKRÄCKANDE attityd på partnerns
- * färg. Markeringen är RÄTTVÄND (ägarbeslut 2026-11-23): den som har dam+
- * uppmuntrar med sitt högsta fria kort, den som saknar det lägger sitt LÄGSTA.
- * Så ett kort som bevisligen är spelarens lägsta (inga lägre kort osedda), lagt
- * i partnerns utspelsfärg av en motspelare som inte vann sticket, sätter ett
- * HP-TAK i färgen (ingen dam+) — förutsatt att minst två högre hackor är
- * osedda, så att spelaren kan ha haft något att uppmuntra med. Kvar som känd
- * lucka: dam-2 dubbelton och D-10-2 lägger också sitt lägsta. Uppmuntran (högt)
- * är tvetydig (dam+, kort färg ELLER längd i sang) och avkodas inte. Räkning
- * (paritet) hör till samplar-arbetet och tas separat.
+ * Bara kort som KAN vara en markering registreras: en hacka (under tian), lagd
+ * av en motspelare som följde färg under de fem första sticken, de två första
+ * gångerna färgen spelas, utan att ta sticket och — i tredje och fjärde hand —
+ * utan att gå över det kort som låg högst (det är ett försök att vinna sticket,
+ * ingen markering).
  *
  * Järnprincip (ingen tjuvkik): bara ärligt synliga kort avkodas, aldrig den
  * agerande platsens egen hand (den samplas inte). Sedan felrapport #96
@@ -164,33 +187,54 @@ export function applySignalReads(
 ): HandModel {
   const humanSeat = opts.humanSeat === undefined ? null : opts.humanSeat
   const declarer = state.contract.declarer
-  for (const trick of state.completedTricks) {
-    if (trick.cards.length === 0) continue
+  const spelade: Card[] = []
+  const tidigare: Record<Seat, Card[]> = { N: [], E: [], S: [], W: [] }
+  const gangerLedd: Partial<Record<Suit, number>> = {}
+  state.completedTricks.forEach((trick, stick) => {
+    if (trick.cards.length === 0) return
     const ledSuit = trick.cards[0].card.suit
-    const leader = trick.leader
-    for (const pc of trick.cards) {
+    const leader = trick.cards[0].seat
+    trick.cards.forEach((pc, plats) => {
       const s = pc.seat
-      if (side(s) === side(declarer)) continue // bara motspelet markerar
-      if (s === seat || (humanSeat !== null && s === humanSeat)) continue // aldrig egen hand
-      if (s === leader || s === trick.winner) continue // utspel / vinnare markerar inte
-      if (pc.card.suit !== ledSuit) continue // bara när platsen följde färg
-      if (side(leader) !== side(s)) continue // attityd bara på PARTNERNS färg
-      // Ett kort är AVSKRÄCKANDE bara om det bevisligen är spelarens lägsta
-      // (alla lägre kort i färgen syns redan för den som läser) OCH spelaren
-      // kan ha haft en högre hacka att uppmuntra med (minst två osedda — med en
-      // enda kan den lika gärna sitta hos spelföraren). Ett TVINGAT kort är
-      // ingen markering (inventeringen 2026-11-22).
-      if (
-        rankVal(pc.card.rank) < rankVal('10') &&
-        oseddaLagre(state, seat, pc.card) === 0 &&
-        oseddaHogreHackor(state, seat, pc.card) >= 2
-      ) {
-        // Avskräckande lägsta kort → förnekar dam+ (max 1 hp = ev. knekt).
-        suitHcpCeil(model[s], ledSuit, 1)
-        clampSeat(model, s, ledSuit)
+      const fore = trick.cards.slice(0, plats)
+      const kanVaraMarkering =
+        plats > 0 &&
+        stick < MARKERINGSSTICK &&
+        (gangerLedd[ledSuit] ?? 0) < 2 && // §8.1: bara de två första gångerna färgen spelas
+        side(s) !== side(declarer) && // bara motspelet markerar
+        s !== seat &&
+        !(humanSeat !== null && s === humanSeat) && // aldrig egen hand
+        s !== leader &&
+        s !== trick.winner && // utspel / vinnare markerar inte
+        pc.card.suit === ledSuit && // bara när platsen följde färg
+        rankVal(pc.card.rank) < rankVal('10') // bara hackor bär markeringar
+      if (kanVaraMarkering) {
+        const partnerLedde = side(leader) === side(s)
+        const vinnare = currentWinner(fore, state.trump)
+        const hogst = fore.find((f) => f.seat === vinnare)!.card
+        // Tredje/fjärde hand: ett kort som går över det högsta i sticket är ett
+        // försök att vinna, ingen markering.
+        const gickOver = plats >= 2 && hogst.suit === ledSuit && rankVal(pc.card.rank) > rankVal(hogst.rank)
+        const trumfFargen = state.trump !== null && ledSuit === state.trump
+        if (!gickOver && !(trumfFargen && !partnerLedde)) {
+          const lasning: Markeringslasning = {
+            card: pc.card,
+            kind: partnerLedde ? 'attitude' : 'count',
+            tidigare: tidigare[s].filter((c) => c.suit === ledSuit),
+            spelade: [...spelade],
+            under: side(vinnare) === side(s) && hogst.suit === ledSuit ? hogst.rank : null,
+            trumfkontrakt: state.trump !== null,
+            trumfFargen,
+            utspel: trick.cards[0].card.rank,
+          }
+          ;(model[s].markeringar ??= []).push(lasning)
+        }
       }
-    }
-  }
+      spelade.push(pc.card)
+    })
+    for (const pc of trick.cards) tidigare[pc.seat].push(pc.card)
+    gangerLedd[ledSuit] = (gangerLedd[ledSuit] ?? 0) + 1
+  })
   // Partnerns Lavinthal-sak: den önskade färgen bär minst en dam.
   // Bara en HÖG sak lovar något (inventeringen 2026-11-22): en färg begärs med
   // dam eller högre i den. En låg sak betyder "den lägre färgen, eller ingenting"
@@ -243,4 +287,34 @@ export function partnerLavinthalSak(state: PlayState, seat: Seat): { suit: Suit;
     return null // sexan säger inget säkert
   }
   return null
+}
+
+/**
+ * AVSKRÄCKTE partnern mitt öppningsutspel (§8.5, ägarbeslut 2026-11-24)? Läst
+ * som vid bordet, utan sampling: partnerns kort i stick 1 var en hacka som inte
+ * försökte ta sticket och som BEVISLIGEN är partnerns lägsta — alla lägre kort
+ * i färgen syns för mig (egen hand, träkarlen, spelade). Dessutom ska minst två
+ * högre hackor vara osedda, så att partnern kan ha haft något att uppmuntra med.
+ * Ett kort som inte säkert är det lägsta läses inte: då fortsätter jag som förr.
+ */
+export function partnerAvskrackteUtspelet(state: PlayState, seat: Seat): boolean {
+  const t = state.completedTricks[0]
+  if (!t || t.cards.length < 4 || t.cards[0].seat !== seat) return false
+  if (side(seat) === side(state.contract.declarer)) return false
+  const partner = PARTNER_SEAT[seat]
+  const suit = t.cards[0].card.suit
+  const plats = t.cards.findIndex((pc) => pc.seat === partner)
+  if (plats < 1) return false
+  const kort = t.cards[plats].card
+  if (kort.suit !== suit || t.winner === partner || rankVal(kort.rank) >= rankVal('10')) return false
+  const fore = t.cards.slice(0, plats)
+  const hogst = fore.find((f) => f.seat === currentWinner(fore, state.trump))!.card
+  if (hogst.suit === suit && rankVal(kort.rank) > rankVal(hogst.rank)) return false // försökte ta sticket
+  const sedda = new Set<Rank>()
+  for (const c of playedCards(state)) if (c.suit === suit) sedda.add(c.rank)
+  for (const v of visibleSeats(state, seat)) for (const c of state.hands[v]) if (c.suit === suit) sedda.add(c.rank)
+  const r = rankVal(kort.rank)
+  const lagreOsedda = RANK_LOW_TO_HIGH.slice(0, r).some((x) => !sedda.has(x))
+  const hogreHackor = RANK_LOW_TO_HIGH.slice(r + 1, rankVal('10')).filter((x) => !sedda.has(x)).length
+  return !lagreOsedda && hogreHackor >= 2
 }
