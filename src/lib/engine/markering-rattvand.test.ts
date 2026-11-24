@@ -149,6 +149,43 @@ describe('räkning på motståndarens färg', () => {
   })
 })
 
+// Ägarbeslut 2026-11-23 (granskningen av frö 20260753 och 20260819): räkning
+// visas INTE i trumffärgen. En hög trumf kan vara värd ett stick (överstöld,
+// gard), och räkningen där hjälper spelföraren mer än partnern.
+describe('ingen räkning i trumffärgen', () => {
+  const trumf = (ranker: string, led: Suit, trump: Suit) =>
+    botCardReasoned(
+      state({
+        trump,
+        seat: 'W',
+        hand: [...farg(led, ranker), C('clubs', '7'), C('clubs', '4')],
+        trick: [
+          { seat: 'N', card: C(led, 'A') },
+          { seat: 'E', card: C(led, '5') },
+          { seat: 'S', card: C(led, '6') },
+        ],
+        leader: 'N',
+      }),
+      'W',
+    )
+
+  it('spelföraren drar trumf: ♥9-2 → tvåan, ingen markering (frö 20260753)', () => {
+    const { card, reason } = trumf('9 2', 'hearts', 'hearts')
+    expect(card).toEqual(C('hearts', '2'))
+    expect(reason).not.toContain('räkning')
+  })
+
+  it('♠8-3 i trumf → trean (frö 20260819)', () => {
+    expect(trumf('8 3', 'spades', 'spades').card).toEqual(C('spades', '3'))
+  })
+
+  it('i en SIDOFÄRG i samma trumfkontrakt visas räkningen som vanligt: ♦8-3 → åttan', () => {
+    const { card, reason } = trumf('8 3', 'diamonds', 'spades')
+    expect(card).toEqual(C('diamonds', '8'))
+    expect(reason).toContain('JÄMNT')
+  })
+})
+
 describe('utspel: tian är topp av sekvens', () => {
   it('10-9-8 → tian', () => {
     expect(honorLead(farg('spades', '10 9 8'))?.rank).toBe('10')

@@ -3675,7 +3675,10 @@ Reglerna för *vilket* kort de väljer:
 
   Annars **avskräcker** jag (lägger mitt lägsta).
 - **Räkning** (jag följer motståndarens färg utan att vinna): **jämnt** antal =
-  högt kort (högt-lågt), **udda** antal = lågt kort (lågt-högt).
+  högt kort (högt-lågt), **udda** antal = lågt kort (lågt-högt). **Inte i
+  trumffärgen** (ägarbeslut 2026-11-23): när spelföraren drar trumf följer jag
+  med mitt lägsta. En hög trumf kan vara värd ett stick, och räkningen där
+  hjälper spelföraren mer än partnern.
 - **Lavinthal** (jag sakar första gången): honnörsvakten väljer en **säker** färg
   att saka ur, och kortets storlek pekar mot den färg jag vill att partnern
   spelar – **högt** = den högre av de två andra färgerna, **lågt** = den lägre.
@@ -3964,6 +3967,10 @@ fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
 ## 9. Ändringslogg
+- **2026-11-23 — ingen räkning i trumffärgen (§8.5, ägarbeslut):** med rättvänd
+  markering började en dubbelton högt även i trumf — ♥9 ur 9-2 under
+  spelförarens trumfess (frö 20260753), ♠8 ur 8-3 (frö 20260819). Nu följer
+  försvararen med sitt lägsta i trumffärgen. Test: `markering-rattvand.test.ts`.
 - **2026-11-23 — MARKERINGARNA ÄR RÄTTVÄNDA (§8.1, ägarbeslut):** boken och
   bottarna spelade omvänd markering sedan 2026-06-26. Fel riktning — nu gäller
   **högt = uppmuntrar, lågt = avskräcker** och **högt-lågt = jämnt antal**.

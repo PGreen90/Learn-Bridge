@@ -265,6 +265,11 @@ function defensiveFollowSignal(state: PlayState, seat: Seat, legal: Hand): CardC
     return { card, reason }
   }
 
+  // Ingen räkning i TRUMFFÄRGEN (ägarbeslut 2026-11-23): en hög trumf kan vara
+  // värd ett stick (överstöld, gard), och räkningen där hjälper spelföraren mer
+  // än partnern. Jag följer med mitt lägsta, utan markering.
+  if (state.trump !== null && led === state.trump) return null
+
   // Motståndaren ledde → RÄKNING (§8.1, rättvänt): jämnt antal = högt (högt-lågt),
   // udda antal = lågt (lågt-högt). Läser bara antalet egna kort i färgen.
   const even = myInLed.length % 2 === 0
