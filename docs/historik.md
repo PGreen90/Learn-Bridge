@@ -22,6 +22,13 @@ stod i boken i fem månader utan att någon reagerade på orden "omvänd markeri
 **Samma kväll:** startsidans tryckkänsla på telefon (prov av `emilkowalski/skills`, LIVE
 `9aebe8d`); den schemalagda spelstyrkemätningen kl. 22:30 startade aldrig (sessionen blev
 stående), mätningen kördes i stället i ett eget arbetsträd.
+**Mätt** (spelförarens stick över 120 givar, alla platser bot;
+`STYRKA=1 STYRKA_GIVAR=120 npx vitest run revisor-output/spelstyrka-fore-efter.probe.test.ts`):
+före v1.0.12 1090 · v1.0.12 (slaskkortet + lösarlagningen, omvänd markering) 1100 · v1.0.13
+(rättvänd) 1090 · med "ingen räkning i trumffärgen" 1092. Trumfregeln (ägarbeslut, LIVE
+`4d55e43`) gav alltså ingen mätbar vinst; den står på bridgeskälet att en hög trumf inte
+kastas för en markering. Fem granskade givar (frö 20260750/-753/-817/-818/-819): svängarna kom
+ur slutspelets beräkningar, inte ur markeringsriktningen. **Kvar:** de fyra luckorna i kartan.
 
 ## 2026-11-23 (slaskkortet + facit-lösarens likvärdiga kort — v1.0.12)
 **Ägarbeslut:** "ibland behöver man kunna lägga ett slaskkort" — i en färg på tre eller fyra
