@@ -205,7 +205,7 @@ balanserat. Bjuder svararen därefter en ny färg lovar det 5+ kort och
 | Svararens bud | Betydelse |
 |---|---|
 | pass | svag hand — "får stanna" i öppnarens andra färg, även i 5-2 (ingen 2M-preferens på dubbelton) |
-| 2M | **exakt 10–11 med tre trumf** ("avancera långsamt"; 12+ bjöd Jacoby direkt). Öppnaren passar med minimum, 4M med 15+ Bergenpoäng. Måttet är **stödpoäng** — samma som valde 1NT-vägen i första svaret: en hand som gick via 1NT med tre trumf fullföljer ALLTID höjningen (felrapport #111) |
+| 2M | **exakt 10–11 med tre trumf** ("avancera långsamt"; 12+ bjöd Jacoby direkt). Öppnaren bjuder 4M med **15+ med fördelning** (Bergenpoäng: hp plus längd och korthet), annars pass — 12 hp med 5-4-2-2 räcker alltså (förslag #133, ägarbeslut 2026-11-24: regeln står kvar, förklaringen säger gränsen i klartext). Måttet är **stödpoäng** — samma som valde 1NT-vägen i första svaret: en hand som gick via 1NT med tre trumf fullföljer ALLTID höjningen (felrapport #111) |
 | 2NT | 11–12 balanserad utan stöd, inbjudan |
 | ny färg på 2-läget | 5+ (oftast 6), svag, till spel |
 | ny färg på 3-läget | 6+, 10–11, inbjudan (§5b beslut 11) |
@@ -4019,7 +4019,29 @@ budgivningens löften. Gäller tumregelspelet (fler kort kvar än Monte-Carlo-
 fönstret, där double-dummy-räkningen redan ser stölden). Facit
 `play-bot-felrapport-117.test.ts`.
 
+**Stöld på korta trumfhanden (2026-11-24, felrapport #134).** Samma förbud
+gäller när **träkarlen är renons** i färgen och kom ner med **högst tre trumf**
+— även om spelförarens renons inte är bevisad. Har spelföraren ett kort kvar i
+färgen är det en förlorare som nu stjäls gratis på den korta trumfhanden; är
+hen renons blir det stöld och sak. Färgen har inget mer att ge försvaret, så
+försvararen byter färg. *Exempel (3♠ av Väst):* Nord spelar ut ♥8 från
+♥K-10-8-5, Syd tar ♥A och vänder med hjärter till Nords kung; bordets ♥D-4 är
+slut och bordet har ♠D-8-3. Nord spelar **inte** en tredje hjärter. Undantag:
+partnern har **visat renons** i färgen och sitter efter bordet — då kan hon
+stjäla över. Har bordet fyra trumf eller fler gäller regeln inte (då kan det
+vara rätt att korta bordets trumf). Facit `play-bot-felrapport-134.test.ts`.
+
 ## 9. Ändringslogg
+- **2026-11-24 — 2M-inbjudans förklaring säger gränsen (§4.1, förslag #133):**
+  texten "öppnaren passar med minimum, utgång med 15+" lästes som hp, och en
+  12 hp-öppnare (15 med fördelning) undrade varför motorn bjöd 4♥. Regeln är
+  oförändrad; förklaringarna säger nu "15+ med fördelning". Facit
+  `auction-forslag-133.test.ts`.
+- **2026-11-24 — ingen stöld på korta trumfhanden (§8.13, felrapport #134):**
+  Nord spelade en tredje hjärter fast bordet var renons med tre trumf (3♠ av
+  Väst, bricka 6) — bordet stal och spelföraren sakade en ruter. §8.13 gällde
+  bara när BÅDA motståndarna var renons; nu räcker det att träkarlen är renons
+  med högst tre trumf. Facit `play-bot-felrapport-134.test.ts`.
 - **2026-11-24 — färgbytet i sang kräver en lucka (§8.5):** mätgivarna 20260752
   (♦K från K-D-kn-10-7, bytte till spader) och 20260798 (♣D-9-8 kvar, bytte till
   spelförarens ruter) gav spelföraren ett stick var. Nu byter utspelaren i sang

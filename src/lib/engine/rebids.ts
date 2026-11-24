@@ -1084,8 +1084,8 @@ export function openerThirdBidAfterSemiForcing1NT(
   // 3M = svararens limithöjning efter mitt 2M-rebud (6+), eller 2M efter min
   // nya färg = exakt 10–11 med tre stöd (ägarbeslut 2026-09-28, läge 3).
   if (second.call === `3${mBid}` || (second.call === `2${mBid}` && second.rule.startsWith('inbjudan'))) {
-    if (bp >= 15) return { call: `4${mBid}`, rule: 'accepterar inbjudan', explanation: `Utgångsvärden mittemot partnerns 3-korts stöd (10–11) → 4${mSym}.` }
-    return { call: 'P', rule: 'pass', explanation: `Minimum → passar partnerns ${second.call === `2${mBid}` ? `2${mSym} (3 stöd, 10–11)` : `inbjudan (3${mSym})`}.` }
+    if (bp >= 15) return { call: `4${mBid}`, rule: 'accepterar inbjudan', explanation: `15+ med fördelning (hp plus längd och korthet) mittemot partnerns 3-korts stöd (10–11) → 4${mSym}.` }
+    return { call: 'P', rule: 'pass', explanation: `Under 15 med fördelning → passar partnerns ${second.call === `2${mBid}` ? `2${mSym} (3 stöd, 10–11)` : `inbjudan (3${mSym})`}.` }
   }
   // Dubbelanpassning (ägarbeslut 2026-09-28): partnerns 4 i min andra färg = 3
   // trumf + 4+ i andrafärgen med äkta kontroll, utgångskrav med min högfärg som

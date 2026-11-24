@@ -722,6 +722,38 @@ function ruffSluffSuits(state: PlayState, seat: Seat, partnerLength: Partial<Rec
 }
 
 /**
+ * §8.13 b (felrapport #134): färger där ett utspel ger träkarlen en STÖLD PÅ
+ * KORTA TRUMFHANDEN — bordet är renons i färgen och kom ner med högst tre
+ * trumf (och har trumf kvar). Spelförarens renons behöver inte vara bevisad:
+ * har han ett kort kvar i färgen är det en förlorare som stjäls gratis, är han
+ * renons blir det stöld och sak. Undantag: partnern har VISAT renons i färgen
+ * och sitter efter bordet — då kan hon stjäla över.
+ */
+function shortHandRuffSuits(state: PlayState, seat: Seat): Set<Suit> {
+  const out = new Set<Suit>()
+  const trump = state.trump
+  const declarer = state.contract.declarer
+  if (trump === null || side(seat) === side(declarer)) return out
+  const dummySeat = dummyOf(state.contract)
+  const dummyHand = state.hands[dummySeat]
+  if (!dummyHand.some((c) => c.suit === trump)) return out
+  const alla = [...state.completedTricks.flatMap((t) => t.cards), ...state.currentTrick]
+  const bordetsTrumfFranBorjan =
+    dummyHand.filter((c) => c.suit === trump).length + alla.filter((pc) => pc.seat === dummySeat && pc.card.suit === trump).length
+  if (bordetsTrumfFranBorjan > 3) return out
+  const voids = shownVoids(state)
+  const partner = PARTNER_SEAT[seat]
+  const partnerEfterBordet = NEXT_SEAT[dummySeat] === partner
+  for (const suit of ['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]) {
+    if (suit === trump || dummyHand.some((c) => c.suit === suit)) continue
+    if (!state.hands[seat].some((c) => c.suit === suit)) continue
+    if (partnerEfterBordet && voids[partner].has(suit) && !voids[partner].has(trump)) continue
+    out.add(suit)
+  }
+  return out
+}
+
+/**
  * Ungefärligt antal stick en färg ger vår sida om vi leder den upprepat (med
  * entré, motståndarna följer, okänd sits → neutral räkning): gå uppifrån – vårt
  * toppkort vinner om det slår motståndarnas bästa kvarvarande, annars offras vårt
@@ -1824,14 +1856,21 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
     // §8.13 (felrapport #117): aldrig en färg till DUBBELRENONS — träkarlen och
     // spelföraren båda renons med trumf kvar = stöld + sak. De färgerna stryks
     // ur fortsättningen OCH ur reservutspelen nedan (finns något annat att spela).
+    // §8.13 b (felrapport #134): detsamma när träkarlen är renons med KORT
+    // trumf (högst tre) — ett kort till där ger en stöld på korta trumfhanden,
+    // vare sig spelföraren har färgen kvar eller inte.
     const dubbelrenons = defender ? ruffSluffSuits(state, seat, opts.partnerLength) : new Set<Suit>()
-    const utanDubbelrenons = legal.filter((c) => !dubbelrenons.has(c.suit))
-    const bytt = dubbelrenons.size > 0 && utanDubbelrenons.length > 0 && utanDubbelrenons.length < legal.length
+    const kortStold = defender ? shortHandRuffSuits(state, seat) : new Set<Suit>()
+    const utanDubbelrenons = legal.filter((c) => !dubbelrenons.has(c.suit) && !kortStold.has(c.suit))
+    const bytt = dubbelrenons.size + kortStold.size > 0 && utanDubbelrenons.length > 0 && utanDubbelrenons.length < legal.length
     const pool = bytt ? utanDubbelrenons : legal
-    const dubbelrenonsText = bytt
-      ? `Jag byter färg: både träkarlen och spelföraren är renons i ${[...dubbelrenons].map((s) => SUIT_GLYPH[s]).join('/')}, ` +
-        'så ett kort till där ger dem stöld på ena handen och sak på den andra (dubbelrenons, §8.13). '
-      : ''
+    const dubbelrenonsText = !bytt
+      ? ''
+      : dubbelrenons.size > 0
+        ? `Jag byter färg: både träkarlen och spelföraren är renons i ${[...dubbelrenons].map((s) => SUIT_GLYPH[s]).join('/')}, ` +
+          'så ett kort till där ger dem stöld på ena handen och sak på den andra (dubbelrenons, §8.13). '
+        : `Jag byter färg: träkarlen är renons i ${[...kortStold].map((s) => SUIT_GLYPH[s]).join('/')} och har kort trumf, ` +
+          'så ett kort till där ger spelföraren en stöld på korta trumfhanden (§8.13). '
     let attackSuit: Suit | null = null
     let attackReason = 'Jag fortsätter motspelets utspelfärg (§8) – vi bygger vidare på den i stället för att öppna en ny färg åt spelföraren.'
     if (openingSuit !== null && pool.some((c) => c.suit === openingSuit)) {

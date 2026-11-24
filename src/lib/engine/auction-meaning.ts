@@ -3640,7 +3640,7 @@ function afterOneMajor(seat: Seat, cb: ParsedBid, u: Undisturbed, prior: Resolve
       // med tre trumf (den svaga handen passar i stället); 4 i öppnarens andra
       // LÅGFÄRG = dubbelanpassning (3 trumf + 4+ där med äkta kontroll), utgångskrav.
       if (same(cb, 2, M)) {
-        if (reb.strain !== M && reb.strain !== 'NT') return R('inbjudan (limithöjning)', `${B(cb)} — 3-korts stöd i ${mname}, exakt 10–11 hp (svagare passar, 12+ bjöd Jacoby). Ej krav — öppnaren passar med minimum, går till utgång med 15+.`)
+        if (reb.strain !== M && reb.strain !== 'NT') return R('inbjudan (limithöjning)', `${B(cb)} — 3-korts stöd i ${mname}, exakt 10–11 hp (svagare passar, 12+ bjöd Jacoby). Ej krav — öppnaren går till utgång med 15+ med fördelning (hp plus längd och korthet), annars pass.`)
         return R('preferens', `${B(cb)} — preferens till ${mname} (2–3 kort), svag hand. Ej krav.`)
       }
       if (same(cb, 3, M)) return R('inbjudan (limithöjning)', `${B(cb)} — 3-korts stöd, 10–11 hp, inbjudan mot partnerns 6+ ${mname}.`)
