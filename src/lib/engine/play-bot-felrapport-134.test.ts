@@ -71,3 +71,36 @@ describe('Felrapport #134 — försvaret ger inte träkarlen en stöld på KORTA
     expect(val.card.suit, val.reason).toBe('hearts')
   })
 })
+
+// ÄGARBESLUT 2026-11-25 (§8.14): när utspelsfärgen är död enligt §8.13 och jag
+// har ESSET i en färg jag själv bjudit (5+), drar jag esset och fortsätter
+// färgen — partnern kan vara kort och få en stöld. Rapportens ord: "spela
+// ruter ess och sen fortsätta i ruter". Nord klev in med 2♦ på ♦A7532, bordet
+// har ♦K94 — Syd har singel ♦8 och stjäl andra ronden.
+describe('Felrapport #134 — esset i egen bjuden färg, sedan en till (§8.14)', () => {
+  it('stick 3: Nord drar ♦A', () => {
+    const st = spela(RAPPORT, 'H8 H4 HA H6 H2 HJ HK HQ')
+    for (const seed of FRON) {
+      const val = botCardSmartReasoned(st, 'N', calls, { rng: mulberry32(seed * 7919) })
+      expect(val.card, `frö ${seed}: ${val.reason}`).toEqual(c('DA'))
+      expect(val.reason).toMatch(/esset i min egen bjudna färg/)
+    }
+  })
+
+  it('stick 4: Nord fortsätter med en låg ruter — partnern kan stjäla', () => {
+    const st = spela(RAPPORT, 'H8 H4 HA H6 H2 HJ HK HQ DA D4 D8 D6')
+    expect(st.toAct).toBe('N')
+    for (const seed of FRON) {
+      const val = botCardSmartReasoned(st, 'N', calls, { rng: mulberry32(seed * 7919) })
+      expect(val.card, `frö ${seed}: ${val.reason}`).toEqual(c('D2'))
+      expect(val.reason).toMatch(/§8\.14/)
+    }
+  })
+
+  it('motvikt: har Nord ALDRIG bjudit rutern dras inte esset på den grunden', () => {
+    const utanInkliv = H('E', 'P P 1S P 2S P 3S P P P')
+    const st = spela(RAPPORT, 'H8 H4 HA H6 H2 HJ HK HQ')
+    const val = botCardSmartReasoned(st, 'N', utanInkliv, { rng: mulberry32(7919) })
+    expect(val.reason).not.toMatch(/§8\.14/)
+  })
+})
