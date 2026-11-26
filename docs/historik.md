@@ -10,6 +10,26 @@
 
 ---
 
+## 2026-11-24…26 (felrapport #134 + förslag #133 — LIVE `ca109be` + `c305f12`)
+**#134 (Dagens MP%, giv 6, 3♠ av Väst):** Nord fortsatte hjärtern fast träkarlen
+var renons med tre trumf — spelföraren fick en stöld på korta trumfhanden. Lagat i
+två lager. **§8.13 b** (`shortHandRuffSuits` i `play-bot.ts`, LIVE `ca109be`):
+försvaret spelar inte en färg där träkarlen är renons och hade högst tre trumf från
+början, om inte partnern sitter efter bordet och kan stjäla över. **§8.14**
+(ägarbeslut 2026-11-25, LIVE `c305f12`): är utspelsfärgen död enligt §8.13 och
+försvararen har esset i en egen naturligt bjuden färg (5+ kort) dras esset, och
+färgen fortsätts nästa gång hen är inne. Gäller inte om partnern visat renons i
+trumf. Facit: `play-bot-felrapport-134.test.ts`.
+**#133 (förslag, ägarval A):** regeln står kvar (öppnaren går till 4M med 15+
+Bergen efter 1M–1NT–2x–2M); förklaringen säger nu "15+ med fördelning (hp plus
+längd och korthet)" i `auction-meaning.ts`, `rebids.ts`, `responder-rebids.ts`
+och bok §4.1. Facit: `auction-forslag-133.test.ts`.
+**Begränsningar (Claudes val, obekräftade):** §8.14 slår bara till när §8.13 redan
+tvingat fram ett färgbyte, och fortsättningen läser inte partnerns markering.
+**Öppet:** #132 (tyck-till, "för ljust i det ljusa läget") är inte besvarad ·
+Nord svarade 1NT med ♠AKJ6 i #133-given (följer ägarbeslut 2026-09-28) — ska fyra
+spader gå före? Ingen notis, ingen versionshöjning.
+
 ## 2026-11-24 (bottarna LÄSER markeringarna + färgbyte vid avskräckning — LIVE `56be430`)
 Lucka 1 i markeringsinventeringen. **Läsningen:** läsaren kör samma regel som
 den som markerar (`foljBetydelse`/`foljKort` i `signals.ts`) på varje tänkt hand

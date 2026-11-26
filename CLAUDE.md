@@ -10,8 +10,8 @@ svarar på vad).
 > ⚪ SENARE. NÄST har max 3 saker. När NU blir klar: flytta upp en sak från NÄST,
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
-> **NÄSTA SESSION BÖRJAR MED** (2026-11-25): /felrapporter; kolla nattkedjan (`gh run list
-> --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget · damfråga i lågfärgstrumf (§6.1) · stört MSS utan stopp · färgbytet (historik 11-24) · iakttagelserna i historik 11-15/11-22. Design-skills (`impeccable`,
+> **NÄSTA SESSION BÖRJAR MED** (2026-11-26): /felrapporter; kolla nattkedjan (`gh run list
+> --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget · damfråga i lågfärgstrumf (§6.1) · stört MSS utan stopp · färgbytet (historik 11-24) · #132 + 1NT-svar med ♠AKJ6 (historik 11-26) · iakttagelserna i historik 11-15/11-22. Design-skills (`impeccable`,
 > `emilkowalski/skills`) ligger i `.agents/skills/` — se FACELIFTEN i senare.md.
 
 ### 🔵 NU — Markeringar och utspel: inventeringen (ägarbeslut 2026-11-22)
@@ -21,7 +21,7 @@ jämnt, ingen räkning i trumf — boken sa "omvänd" i fem månader (historik 1
 Läsningen LIVE `56be430`. **Kvar, ägarbeslut:** utspelet läses bara i sang ·
 färgpreferens efter attityd · §8.7 "ta esset" i sang · fyra-kortsgränsen för längd i sang.
 Stjärntävlingen (kodnamn `guld`, `docs/nasta-niva-plan.md`) är parallellt ägarsteg (live-prov).
-Senast LIVE: `9aebe8d` startsidans tryckkänsla · v1.0.11 startsidan i grupper · v1.0.5 `1731319` (spelbordet A–E).
+Senast LIVE: `c305f12` §8.13 b + §8.14 (#134) · `9aebe8d` startsidans tryckkänsla · v1.0.11 startsidan i grupper.
 
 **LIVE `2776fa5` (bok §6.1):** 4NT gäller alltid den senast ÄKTA bjudna färgen ·
 slamtabellen: 5 nyckelkort = slam · 4 + dam = slam · 4 utan dam
