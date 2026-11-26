@@ -26,8 +26,8 @@ längd och korthet)" i `auction-meaning.ts`, `rebids.ts`, `responder-rebids.ts`
 och bok §4.1. Facit: `auction-forslag-133.test.ts`.
 **Begränsningar (Claudes val, obekräftade):** §8.14 slår bara till när §8.13 redan
 tvingat fram ett färgbyte, och fortsättningen läser inte partnerns markering.
-**Öppet:** #132 (tyck-till, "för ljust i det ljusa läget") är inte besvarad ·
-Nord svarade 1NT med ♠AKJ6 i #133-given (följer ägarbeslut 2026-09-28) — ska fyra
+**#132 (tyck-till, "för ljust i det ljusa läget"):** antecknad under FACELIFTEN i
+`docs/senare.md`, stängd med tack 2026-11-26. **Öppet:** Nord svarade 1NT med ♠AKJ6 i #133-given (följer ägarbeslut 2026-09-28) — ska fyra
 spader gå före? Ingen notis, ingen versionshöjning.
 
 ## 2026-11-24 (bottarna LÄSER markeringarna + färgbyte vid avskräckning — LIVE `56be430`)

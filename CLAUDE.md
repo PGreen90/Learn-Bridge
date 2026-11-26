@@ -11,7 +11,7 @@ svarar på vad).
 > visa återstående punkter (regeln i `docs/arbetsrutiner.md`) och låt ägaren välja.
 
 > **NÄSTA SESSION BÖRJAR MED** (2026-11-26): /felrapporter; kolla nattkedjan (`gh run list
-> --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget · damfråga i lågfärgstrumf (§6.1) · stört MSS utan stopp · färgbytet (historik 11-24) · #132 + 1NT-svar med ♠AKJ6 (historik 11-26) · iakttagelserna i historik 11-15/11-22. Design-skills (`impeccable`,
+> --limit 6`). Öppna ägarfrågor: 19+ efter cue-höjningen via andra cuen (§7.1) · sen cue efter 3m (§7.2) · stört 2♣ (§7.9): svararens första tur + är öppnarens färgbud krav · störd inverterad (§4.2): 3-läget · damfråga i lågfärgstrumf (§6.1) · stört MSS utan stopp · färgbytet (historik 11-24) · 1NT-svar med ♠AKJ6 (historik 11-26) · iakttagelserna i historik 11-15/11-22. Design-skills (`impeccable`,
 > `emilkowalski/skills`) ligger i `.agents/skills/` — se FACELIFTEN i senare.md.
 
 ### 🔵 NU — Markeringar och utspel: inventeringen (ägarbeslut 2026-11-22)

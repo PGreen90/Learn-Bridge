@@ -437,6 +437,10 @@ stod kvar som stale. Sedan 2026-08-08 låst med linjebyggstest
 > att ägaren ritar i Figma — nej), (4) Playwright CLI (webbläsarkontroll finns redan).
 > (2) INSTALLERAD 2026-11-23 i `.agents/skills/` (ospårad som `impeccable`; utom `animate-expo`,
 > `write-swift`, `ask-sonner`), ännu inte använd. Claudes förslag: pröva den på EN yta.
+>
+> **Användarsynpunkt #132 (tyck-till 2026-11-24, startsidan):** "Det är för ljust i det ljusa
+> läget." En röst hittills. Att pröva när det ljusa temat ses över: bakgrundens och kortens
+> vithet och kontrasten mot emerald (läs de verkliga färgerna i `src/index.css`).
 Parkerad 2026-07-20, **väckt av ägaren 2026-07-29** som del av konkurrensspåret
 (`docs/konkurrensplan.md` Fas 1 — första intrycket görs bara en gång, före
 lanseringen av "Dagens givar"). **PÅBÖRJAD 2026-07-31, en yta i taget** (ägarbeslut):
