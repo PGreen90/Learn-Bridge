@@ -687,6 +687,9 @@ export interface ReasonedOpts {
   /** Färger MOTSTÅNDARNA bjudit (ur budgivningen) — undviks när motspelaren
    *  byter färg efter partnerns avskräckning ("vänd i objuden", §8.5). */
   motstandarfarger?: Suit[]
+  /** Färger JAG själv bjudit naturligt och har fem kort eller fler i — esset i
+   *  en sådan dras när utspelsfärgen är död, och färgen fortsätts (§8.14). */
+  egnaLangfarger?: Suit[]
 }
 
 /**
@@ -1962,6 +1965,36 @@ export function botCardReasoned(state: PlayState, seat: Seat, opts: ReasonedOpts
           : attackReason,
       }
     }
+    // §8.14 (felrapport #134, ägarbeslut 2026-11-25): utspelsfärgen är död
+    // (§8.13) och jag har bjudit en egen långfärg. Har jag esset där drar jag
+    // det; har jag redan dragit det fortsätter jag färgen med lägsta kortet —
+    // partnern kan vara kort och stjäla. Inte om partnern visat renons i trumf.
+    if (bytt && state.trump !== null && !shownVoids(state)[PARTNER_SEAT[seat]].has(state.trump)) {
+      for (const suit of opts.egnaLangfarger ?? []) {
+        if (suit === state.trump) continue
+        const mina = pool.filter((c) => c.suit === suit)
+        if (mina.length === 0) continue
+        const ess = mina.find((c) => c.rank === 'A')
+        if (ess) {
+          return {
+            card: ess,
+            reason:
+              dubbelrenonsText +
+              `Jag drar esset i min egen bjudna färg (${SUIT_GLYPH[suit]}) och fortsätter sedan färgen: partnern kan vara kort där och få en stöld (§8.14).`,
+          }
+        }
+        const jagLeddeEsset = state.completedTricks.some(
+          (t) => t.cards[0].seat === seat && t.cards[0].card.suit === suit && t.cards[0].card.rank === 'A',
+        )
+        if (jagLeddeEsset) {
+          return {
+            card: lowest(mina),
+            reason:
+              `Jag fortsätter min egen bjudna färg (${SUIT_GLYPH[suit]}) efter esset: partnern kan vara kort där och stjäla (§8.14).`,
+          }
+        }
+      }
+    }
     // Partnerns LÅGA sak (ett tips, ingen order) lyds här: utspelsfärgen hade
     // inget att ge.
     if (signalsOn) {
@@ -2485,10 +2518,21 @@ export function botCardSmartBase(
     const paUtspel = state.currentTrick.length === 0 && calls.length > 0 && side(seat) !== side(state.contract.declarer)
     const motstandarfarger = paUtspel ? analyzeAuctionForLead(calls, seat).oppSuits : []
     if (paUtspel && state.trump !== null) {
-      const lovat = buildHandModel(calls, {})[PARTNER_SEAT[seat]].length
+      const modell = buildHandModel(calls, {})
+      const lovat = modell[PARTNER_SEAT[seat]].length
+      const eget = modell[seat].length
+      // Egen bjuden långfärg: budet lovade färgen (4+ i modellen; inklivets regel
+      // ger 5+) OCH jag hade själv fem kort eller fler där från början.
+      const minaSpelade = state.completedTricks.flatMap((t) => t.cards).filter((pc) => pc.seat === seat)
+      const franBorjan = (su: Suit) =>
+        state.hands[seat].filter((k) => k.suit === su).length + minaSpelade.filter((pc) => pc.card.suit === su).length
+      const egnaLangfarger = (['spades', 'hearts', 'diamonds', 'clubs'] as Suit[]).filter(
+        (su) => eget[su].min >= 4 && franBorjan(su) >= 5,
+      )
       return botCardReasoned(state, seat, {
         partnerLength: { spades: lovat.spades.min, hearts: lovat.hearts.min, diamonds: lovat.diamonds.min, clubs: lovat.clubs.min },
         motstandarfarger,
+        egnaLangfarger,
       })
     }
     return botCardReasoned(state, seat, { motstandarfarger })

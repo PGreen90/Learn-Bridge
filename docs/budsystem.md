@@ -4031,7 +4031,22 @@ partnern har **visat renons** i färgen och sitter efter bordet — då kan hon
 stjäla över. Har bordet fyra trumf eller fler gäller regeln inte (då kan det
 vara rätt att korta bordets trumf). Facit `play-bot-felrapport-134.test.ts`.
 
+### 8.14 Motspel: esset i egen bjuden färg, sedan en till (2026-11-25, felrapport #134)
+När utspelsfärgen är död enligt §8.13 och försvararen har **esset i en färg
+hen själv bjudit** (naturligt, med fem kort eller fler), **dras esset** — och
+nästa gång försvararen är inne **fortsätts färgen** med lägsta kortet.
+Tanken: partnern kan vara kort i färgen och få en stöld (ägarbeslut
+2026-11-25: "spela ruter ess och sen fortsätta i ruter"). *Exempel (3♠ av
+Väst, Nord klev in med 2♦):* Nord har ♦A-7-5-3-2, bordet ♦K-9-4. Nord drar
+♦A och spelar ♦2 — Syd hade singel ruter och stjäl. Regeln gäller inte om
+partnern har visat renons i trumf. Bara ärlig information: egen hand och egna
+bud. Facit `play-bot-felrapport-134.test.ts`.
+
 ## 9. Ändringslogg
+- **2026-11-25 — esset i egen bjuden färg, sedan en till (§8.14, felrapport #134):**
+  efter färgbytet i §8.13 valde Nord ♣6; ägarens besked är ruter ess och mer
+  ruter (partnern kan vara kort). Ny regel för försvararen med ess i egen
+  bjuden femkortsfärg. Facit `play-bot-felrapport-134.test.ts`.
 - **2026-11-24 — 2M-inbjudans förklaring säger gränsen (§4.1, förslag #133):**
   texten "öppnaren passar med minimum, utgång med 15+" lästes som hp, och en
   12 hp-öppnare (15 med fördelning) undrade varför motorn bjöd 4♥. Regeln är
